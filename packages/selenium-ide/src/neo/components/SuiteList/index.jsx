@@ -32,7 +32,14 @@ export default class SuiteList extends React.Component {
     removeSuite: PropTypes.func.isRequired,
     codeExport: PropTypes.func.isRequired,
   }
+
+
+
+
   render() {
+
+    console.log(this.props.suites)
+    debugger
     return (
       <ul className="projects">
         {this.props.suites.map(suite => (

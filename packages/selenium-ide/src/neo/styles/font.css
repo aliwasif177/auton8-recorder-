@@ -131,6 +131,7 @@
 }
 .si-more::before {
   content: '\e911';
+  display: none !important;
 }
 .si-play-all::before {
   content: '\e90f';
@@ -152,4 +153,10 @@
 }
 .si-select::before {
   content: '\e929';
+}
+.container .wrapper {
+  height: 100vh !important;
+}
+.pane {
+  height: 100% !important;
 }

@@ -38,6 +38,7 @@ import Modal from '../Modal'
 import UiState from '../../stores/view/UiState'
 import PlaybackState from '../../stores/view/PlaybackState'
 import ModalState from '../../stores/view/ModalState'
+import API from '../../../../src/neo/components/Dialogs/service/httpService'
 import '../../side-effects/contextMenu'
 import '../../styles/app.css'
 import '../../styles/font.css'
@@ -47,6 +48,10 @@ import { isProduction, isTest, userAgent } from '../../../common/utils'
 import Logger from '../../stores/view/Logs'
 
 import { loadProject, saveProject, loadJSProject } from '../../IO/filesystem'
+import { authHeader } from '../../components/Dialogs/service/authHeader'
+import axios from 'axios'
+import ExportDialog from '../../components/Dialogs/Export/index'
+import { LoginContainer } from '../LoginContainer/LoginContainer'
 
 if (!isTest) {
   const api = require('../../../api')
@@ -64,6 +69,7 @@ UiState.setProject(project)
 
 if (isProduction) {
   createDefaultSuite(project, { suite: '', test: '' })
+
 } else {
   seed(project)
 }
@@ -73,6 +79,7 @@ function createDefaultSuite(
   aProject,
   name = { suite: 'Default Suite', test: 'Untitled' }
 ) {
+  debugger
   const suite = aProject.createSuite(name.suite)
   const test = aProject.createTestCase(name.test)
   suite.addTestCase(test)
@@ -107,7 +114,7 @@ if (browser.windows) {
 export default class Panel extends React.Component {
   constructor(props) {
     super(props)
-    this.state = { project }
+    this.state = { project, saveButton: false, modalOpen: false,shouldLogin:false }
     this.parseKeyDown = this.parseKeyDown.bind(this)
     this.keyDownHandler = window.document.body.onkeydown = this.handleKeyDown.bind(
       this
@@ -238,6 +245,14 @@ export default class Panel extends React.Component {
       UiState.toggleConsole()
     }
   }
+
+
+componentDidMount(){
+    localStorage.getItem('token') ? this.getAllGroups() : this.setState({shouldLogin:true})
+}
+
+
+
   async loadNewProject() {
     if (!UiState.isSaved()) {
       const choseProceed = await ModalState.showAlert({
@@ -271,10 +286,111 @@ export default class Panel extends React.Component {
     const name = await ModalState.renameProject()
     const newProject = observable(new ProjectStore(name))
     createDefaultSuite(newProject)
-    loadJSProject(this.state.project, newProject.toJS())
+    // loadJSProject(this.state.project, newProject.toJS())
     Logger.clearLogs()
     newProject.setModified(false)
   }
+
+
+  getAllGroups = async() => {
+    let data= {
+      "pageNo": 0,
+      "pageSize": 200,
+      "sortBy": "",
+      "sortDirection": "",
+      "searchParams": {
+          "projectName": "undefinedsms:undefined",
+          "testCaseName": "",
+          "emailList": "",
+          "smsListName": ""
+      }
+  }
+   
+  
+    let groupInitialData = {};
+    groupInitialData.data={data}
+    groupInitialData.path = "/groups/paginated";
+    groupInitialData.csrf = authHeader();
+    API.post(groupInitialData).then(res=>{
+      let newProject=null
+      let suites = []
+      let testCase = []
+      newProject =observable(new ProjectStore('Auton8'))
+      res.data.payload.map((data,index)=>{
+        suites[index] = newProject.createSuite(data.siteGroupName)
+        suites[index].groupTestId=data.siteGroupId;
+          let groupTestcaseInitialData = {};
+          groupTestcaseInitialData.path = `/groups/${data.siteGroupId}/testcases`;
+          groupTestcaseInitialData.csrf = authHeader();
+          let nextIndex=index
+          
+          API.fetch(groupTestcaseInitialData).then(res=>{
+
+res.data.payload.map(data=>{
+
+  testCase[nextIndex]=newProject.createTestCase(data.testName)
+  testCase[nextIndex]['testCaseId'] = data.testCaseId;
+  testCase[nextIndex]['emailAddressListId']=data.emailAddressListId;
+  testCase[nextIndex]['smsAlertListId']=data.smsAlertListId;
+  
+  
+            suites[nextIndex].addTestCase(testCase[nextIndex]) 
+            console.log(suites[nextIndex])
+
+            let testCaseStepsData = {}
+            testCaseStepsData.path = `/testcases/${data.testCaseId}/testcasesteps`;
+            testCaseStepsData.csrf = authHeader();
+            API.fetch(testCaseStepsData).then(res=>{
+              res.data.payload.map(step=>{
+                let stepSplits = step.command.split('|')
+
+                testCase[nextIndex].createCommand(undefined, 'open', '/checkboxes')
+            testCase[nextIndex].createCommand(undefined, stepSplits[0],stepSplits[1], stepSplits[2])
+            loadJSProject(this.state.project, newProject.toJS())
+              })
+
+console.log(res.data.payload)
+            }).catch(err=>{
+
+            })
+
+})
+          
+          
+
+
+
+
+
+// debugger
+
+          }).catch(err=>{
+            console.log(err)
+
+          });
+          
+        
+      })
+      // loadJSProject(this.state.project, newProject.toJS())
+      // let tempProjects ={...this.state.project}
+      // tempProjects.suites=tempProjects.suites.push(res.data.payload)
+      // this.setState({
+      //   project:tempProjects
+      // })
+    }).catch(err=>{
+      console.log(err)
+    });
+  }
+
+
+  handleLoginModal = (bool) => {
+    this.setState({
+      shouldLogin:bool
+      
+    })
+  }
+
+
   async doLoadProject(file) {
     if (!UiState.isSaved()) {
       const choseProceed = await ModalState.showAlert({
@@ -312,6 +428,71 @@ export default class Panel extends React.Component {
       window.removeEventListener('beforeunload', this.quitHandler)
     }
   }
+  save = () => {
+    console.log("FUKCY OUUUUU", UiState.selectedTest)
+    this.setState({saveButton: !this.state.saveButton, modalOpen: !this.state.modalOpen})
+  }
+
+
+
+
+  addTeststepstoTestCase = async(id) => {
+    console.log('my id ' , id)
+  
+    UiState.displayedTest.commands.map(command=>{
+      console.log(command)
+      let params = new FormData();
+      let commandTargetValue=command.command+'|'+command.target+'|'+command.value
+  
+      params.append("file", null);
+      params.append(
+        "testCaseStep",
+        new Blob(
+          [
+            JSON.stringify({
+              testCaseId: id,
+              command: commandTargetValue,
+            }),
+          ],
+          {
+            type: "application/json",
+          }
+        )
+      );
+  
+      let testStepData = {};
+      testStepData.data=params
+      testStepData.path = '/testcasesteps';
+      testStepData.csrf = authHeader();
+      const response =  API.post(testStepData).then((res)=>{
+        console.log(res)
+  
+  
+          
+          
+          
+    
+      }).catch((err)=>{
+        
+      });
+  
+  
+  
+  
+      
+  
+  
+    })
+      
+    }
+
+    updateTestCase = () => {
+      console.log(UiState)
+      console.log(this.state.project.displayedTest)
+    }
+
+
+
   render() {
     return (
       <div
@@ -321,38 +502,49 @@ export default class Panel extends React.Component {
         )}
         onKeyDown={this.handleKeyDownAlt.bind(this)}
         style={{
-          minHeight: UiState.minContentHeight + UiState.minConsoleHeight + 'px',
+          minHeight: UiState.minContentHeight + UiState.minConsoleHeight + 'px',height:'100vh'
         }}
       >
-        <SuiteDropzone loadProject={this.doLoadProject.bind(this)}>
+       {localStorage.getItem('token') && !this.state.shouldLogin ? <SuiteDropzone loadProject={this.doLoadProject.bind(this)}>
           <SplitPane
             split="horizontal"
-            minSize={UiState.minContentHeight}
-            maxSize={UiState.maxContentHeight}
-            size={UiState.windowHeight - UiState.consoleHeight}
+            minSize={UiState.windowHeight}
+            maxSize={UiState.windowHeight}
+            size={UiState.windowHeight}
             onChange={size => UiState.resizeConsole(window.innerHeight - size)}
             style={{
               position: 'initial',
+              height:'100%'
             }}
           >
             <div className="wrapper">
+            {/* //Modal Start */}
+
+
+
+            {/* //Modal End */}
               <PauseBanner />
               <ProjectHeader
                 title={this.state.project.name}
                 changed={this.state.project.modified}
                 changeName={this.state.project.changeName}
-                openFile={openFile => {
-                  this.openFile = openFile
-                }}
-                load={this.doLoadProject.bind(this)}
-                save={() => saveProject(this.state.project)}
-                new={this.loadNewProject.bind(this)}
+                // openFile={openFile => {
+                //   this.openFile = openFile
+                // }}
+                // load={this.doLoadProject.bind(this)}
+                // load={this.updateTestCase}
+                save={() => 
+                  this.save()
+                  // saveProject(this.state.project)
+                }
+                new={this.updateTestCase}
               />
               <div
                 className={classNames('content', {
                   dragging: UiState.navigationDragging,
                 })}
               >
+              { this.state.saveButton && <ExportDialog isExporting={this.state.modalOpen} cancelSelection={this.save} />}
                 <SplitPane
                   split="vertical"
                   minSize={UiState.minNavigationWidth}
@@ -385,7 +577,7 @@ export default class Panel extends React.Component {
             createNewProject={this.createNewProject.bind(this)}
           />
           <Tooltip />
-        </SuiteDropzone>
+        </SuiteDropzone> :<LoginContainer getAllGroups={this.getAllGroups} handleLoginModal={this.handleLoginModal} />}
       </div>
     )
   }

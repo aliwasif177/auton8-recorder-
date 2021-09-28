@@ -26,7 +26,7 @@ export default class NewButton extends React.Component {
     const props = { ...this.props }
     return (
       <ActionButton
-        data-tip={`<p>Create new project <span style="color: #929292;padding-left: 5px;">${
+        data-tip={`<p>Clone test case <span style="color: #929292;padding-left: 5px;">${
           !UiState.keyboardShortcutsEnabled
             ? ''
             : parse('n', { primaryKey: true, shiftKey: true })

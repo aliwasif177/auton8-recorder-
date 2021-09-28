@@ -257,7 +257,7 @@ function runProject(project) {
       new Error(
         `The project ${
           project.name
-        } has no test suites defined, create a suite using the IDE.`
+        } has no Group tests defined, create a suite using the IDE.`
       )
     )
   }

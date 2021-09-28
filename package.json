@@ -64,5 +64,10 @@
     "putasset": "^4.3.2",
     "grizzly": "^4.0.1"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@material-ui/core": "^4.12.3",
+    "axios": "^0.21.1",
+    "react-loader-spinner": "^4.0.0",
+    "react-toastify": "^8.0.2"
+  }
 }

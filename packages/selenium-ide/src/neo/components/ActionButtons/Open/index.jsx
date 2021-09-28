@@ -86,7 +86,7 @@ export class OpenInput extends React.Component {
           ref={label => {
             this.label = label
           }}
-          data-tip={`<p>Open project <span style="color: #929292;padding-left: 5px;">${
+          data-tip={`<p>Update test case <span style="color: #929292;padding-left: 5px;">${
             !UiState.keyboardShortcutsEnabled
               ? ''
               : parse('o', { primaryKey: true })

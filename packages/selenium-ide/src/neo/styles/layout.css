@@ -12,6 +12,10 @@
   flex-direction: column;
 }
 
+.container .wrapper .pane {
+  height: 100% !important;
+}
+
 .container .wrapper .SplitPane.vertical {
   height: initial !important;
   position: initial !important;

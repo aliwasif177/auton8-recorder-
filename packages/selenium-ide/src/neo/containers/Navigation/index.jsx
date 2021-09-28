@@ -92,7 +92,7 @@ export default class Navigation extends React.Component {
               aria-label="Add new test"
             />
           )}
-          {UiState.selectedView === 'Test suites' && (
+          {UiState.selectedView === 'Group Tests' && (
             <AddButton
               data-tip={'<p>Add new test suite</p>'}
               data-event="focus mouseenter"
@@ -118,7 +118,7 @@ export default class Navigation extends React.Component {
                 />
               </React.Fragment>
             )}
-            {UiState.selectedView === 'Test suites' && (
+            {UiState.selectedView === 'Group Tests' && (
               <React.Fragment>
                 <SearchBar
                   value={UiState.filterTerm}

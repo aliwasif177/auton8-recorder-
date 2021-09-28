@@ -27,7 +27,7 @@ import WindowSession from '../../IO/window-session'
 import BackgroundRecorder from '../../IO/SideeX/recorder'
 
 class UiState {
-  views = ['Tests', 'Test suites', 'Executing']
+  views = ['Tests', 'Group Tests', 'Executing']
   @observable
   lastViewSelection = new Map()
   @observable
@@ -291,7 +291,7 @@ class UiState {
     if (this.selectedView === 'Tests') {
       const test = selectTestInArray(index, this.filteredTests)
       if (test) this.selectTest(test)
-    } else if (this.selectedView === 'Test suites') {
+    } else if (this.selectedView === 'Group Tests') {
       const suiteState = this.getSuiteState(suite)
       const tests = suiteState.filteredTests.get()
       const test = selectTestInArray(index, tests)
