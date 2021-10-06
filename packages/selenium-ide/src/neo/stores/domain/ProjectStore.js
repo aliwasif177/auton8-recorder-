@@ -137,7 +137,6 @@ export default class ProjectStore {
   createTestCase(...argv) {
     const test = new TestCase(undefined, ...argv)
     this.addTestCase(test)
-
     return test
   }
 

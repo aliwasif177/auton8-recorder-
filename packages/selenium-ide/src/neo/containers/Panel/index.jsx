@@ -79,7 +79,6 @@ function createDefaultSuite(
   aProject,
   name = { suite: 'Default Suite', test: 'Untitled' }
 ) {
-  debugger
   const suite = aProject.createSuite(name.suite)
   const test = aProject.createTestCase(name.test)
   suite.addTestCase(test)
@@ -114,7 +113,7 @@ if (browser.windows) {
 export default class Panel extends React.Component {
   constructor(props) {
     super(props)
-    this.state = { project, saveButton: false, modalOpen: false,shouldLogin:false }
+    this.state = { project, saveButton: false, modalOpen: false,shouldLogin:false, isCloaning:true,isUpdating:false }
     this.parseKeyDown = this.parseKeyDown.bind(this)
     this.keyDownHandler = window.document.body.onkeydown = this.handleKeyDown.bind(
       this
@@ -323,20 +322,17 @@ componentDidMount(){
           groupTestcaseInitialData.path = `/groups/${data.siteGroupId}/testcases`;
           groupTestcaseInitialData.csrf = authHeader();
           let nextIndex=index
+
+          let nextData = data
           
           API.fetch(groupTestcaseInitialData).then(res=>{
 
 res.data.payload.map(data=>{
 
-  testCase[nextIndex]=newProject.createTestCase(data.testName)
-  testCase[nextIndex]['testCaseId'] = data.testCaseId;
-  testCase[nextIndex]['emailAddressListId']=data.emailAddressListId;
-  testCase[nextIndex]['smsAlertListId']=data.smsAlertListId;
+  testCase[nextIndex]=newProject.createTestCase(data.testName,data.testCaseId,data.emailAddressListId,data.smsAlertListId)
   
   
             suites[nextIndex].addTestCase(testCase[nextIndex]) 
-            console.log(suites[nextIndex])
-
             let testCaseStepsData = {}
             testCaseStepsData.path = `/testcases/${data.testCaseId}/testcasesteps`;
             testCaseStepsData.csrf = authHeader();
@@ -346,10 +342,10 @@ res.data.payload.map(data=>{
 
                 testCase[nextIndex].createCommand(undefined, 'open', '/checkboxes')
             testCase[nextIndex].createCommand(undefined, stepSplits[0],stepSplits[1], stepSplits[2])
+            // console.log(newProject.toJS())
             loadJSProject(this.state.project, newProject.toJS())
               })
 
-console.log(res.data.payload)
             }).catch(err=>{
 
             })
@@ -487,8 +483,8 @@ console.log(res.data.payload)
     }
 
     updateTestCase = () => {
-      console.log(UiState)
-      console.log(this.state.project.displayedTest)
+      console.log(UiState.displayedTest)
+      console.log(this.state.project)
     }
 
 

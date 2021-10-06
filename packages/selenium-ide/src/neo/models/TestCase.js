@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import { action, observable, reaction } from 'mobx'
+import { action, computed, observable, reaction } from 'mobx'
 import uuidv4 from 'uuid/v4'
 import Command from './Command'
 
@@ -23,6 +23,12 @@ export default class TestCase {
   id = null
   @observable
   name = null
+  @observable
+  testCaseId = null
+  @observable
+  emailAddressListId = null
+  @observable
+  smsAlertListId = null
   @observable
   commands = []
   nameDialogShown = false
@@ -33,9 +39,14 @@ export default class TestCase {
   @observable
   scrollY = null
 
-  constructor(id = uuidv4(), name = 'Untitled Test') {
+  constructor(id = uuidv4(), name = 'Untitled Test', ...argv) {
     this.id = id
     this.name = name
+
+    this.testCaseId = argv[0]
+    this.emailAddressListId = argv[1]
+    this.smsAlertListId = argv[2]
+
     this.changeDisposer = reaction(
       () =>
         this.commands.map(({ command, target, targets, value }) => ({
@@ -155,6 +166,9 @@ export default class TestCase {
       id: this.id,
       name: this.name,
       commands: this.commands.map(c => c.export()),
+      emailAddressListId: this.emailAddressListId,
+      testCaseId: this.testCaseId,
+      smsAlertListId: this.emailAddressListId,
     }
   }
 
@@ -166,6 +180,9 @@ export default class TestCase {
   static fromJS = function(jsRep) {
     const test = new TestCase(jsRep.id)
     test.setName(jsRep.name)
+    test.emailAddressListId = jsRep.emailAddressListId
+    test.testCaseId = jsRep.testCaseId
+    test.smsAlertListId = jsRep.smsAlertListId
     test.commands.replace(jsRep.commands.map(Command.fromJS))
 
     return test
