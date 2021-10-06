@@ -23,7 +23,7 @@ import UiState from '../../../stores/view/UiState'
 import project from '../../../../../package.json'
 import Modal from '../../Modal'
 import DialogContainer from '../Dialog'
-import logoFile from '../../../assets/images/selenium_blue_white32@3x.svg'
+import logoFile from '../../../assets/images/Auton8_logo.jpg'
 import { OpenInput } from '../../ActionButtons/Open'
 import './style.css'
 
@@ -89,22 +89,23 @@ class WelcomeDialogContents extends React.Component {
         renderTitle={() => (
           <div>
             <div className="welcome-dialog__title">
-              Welcome to Selenium IDE!
+              Welcome to Auton8!
             </div>
             <div className="welcome-dialog__subtitle">
-              Version {project.version}
+              {/* Version {project.version} */}
+              Version 1.0.0
             </div>
           </div>
         )}
         renderFooter={() => (
           <p>
-            To learn more on Selenium IDE and how to use it visit the{' '}
+            To learn more on Autnon8 recorder and how to use it visit the{' '}
             <a
-              href="https://www.seleniumhq.org/selenium-ide/"
+              href="https://www.auton8.com/"
               target="_blank"
               rel="noopener noreferrer"
             >
-              the Selenium IDE project page
+              Autno8 page
             </a>
             .
           </p>
@@ -130,7 +131,7 @@ class WelcomeDialogContents extends React.Component {
               <a onClick={this.createNewProject}>Create a new project</a>
             </li>
             <li>
-              <a onClick={this.dismiss}>Close Selenium IDE</a>
+              <a onClick={this.dismiss}>Close Auton8</a>
             </li>
           </ul>
         </div>

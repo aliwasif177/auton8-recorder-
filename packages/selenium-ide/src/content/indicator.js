@@ -8,8 +8,8 @@ var handleMessage = (function() {
   var lastTimeoutHandle = 0
 
   function resetContent() {
-    content.innerText = 'Selenium IDE is recording...'
-    content.setAttribute('aria-label', 'Selenium IDE is recording...')
+    content.innerText = 'Auton8 is recording...'
+    content.setAttribute('aria-label', 'Auton8 is recording...')
     content.setAttribute('role', 'alert')
     content.style.color = '#E80600'
     circle.style.animation = 'fadeIn 1s infinite alternate'

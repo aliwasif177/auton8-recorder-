@@ -1,7 +1,7 @@
 {
   "name": "@seleniumhq/side-model",
   "version": "3.17.0",
-  "description": "Data for Selenium IDE",
+  "description": "Data for Auton8",
   "repository": "https://github.com/SeleniumHQ/selenium-ide",
   "keywords": [
     "selenium",

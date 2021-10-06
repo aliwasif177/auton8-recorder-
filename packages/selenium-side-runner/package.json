@@ -1,7 +1,7 @@
 {
   "name": "selenium-side-runner",
   "version": "3.17.0",
-  "description": "Run Selenium IDE projects in cli",
+  "description": "Run Auton8 projects in cli",
   "repository": "https://github.com/SeleniumHQ/selenium-ide",
   "scripts": {
     "build": "babel -d dist src --ignore=src/__test__",
