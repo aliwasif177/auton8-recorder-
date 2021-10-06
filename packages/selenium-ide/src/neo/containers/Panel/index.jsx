@@ -52,6 +52,7 @@ import { authHeader } from '../../components/Dialogs/service/authHeader'
 import axios from 'axios'
 import ExportDialog from '../../components/Dialogs/Export/index'
 import { LoginContainer } from '../LoginContainer/LoginContainer'
+import { CloanContainer } from '../cloneConainer/CloanContainer'
 
 if (!isTest) {
   const api = require('../../../api')
@@ -113,7 +114,7 @@ if (browser.windows) {
 export default class Panel extends React.Component {
   constructor(props) {
     super(props)
-    this.state = { project, saveButton: false, modalOpen: false,shouldLogin:false, isCloaning:true,isUpdating:false }
+    this.state = { project, saveButton: false, modalOpen: false,shouldLogin:false, isCloaning:false,isUpdating:false }
     this.parseKeyDown = this.parseKeyDown.bind(this)
     this.keyDownHandler = window.document.body.onkeydown = this.handleKeyDown.bind(
       this
@@ -484,9 +485,18 @@ res.data.payload.map(data=>{
 
     updateTestCase = () => {
       console.log(UiState.displayedTest)
+      this.setState({
+        isCloaning:true
+      })
       console.log(this.state.project)
     }
 
+
+    cloneToggle = () =>{
+      this.setState({
+        isCloaning:!this.state.isCloaning
+      })
+    }
 
 
   render() {
@@ -501,6 +511,9 @@ res.data.payload.map(data=>{
           minHeight: UiState.minContentHeight + UiState.minConsoleHeight + 'px',height:'100vh'
         }}
       >
+        {localStorage.getItem('token') && this.state.isCloaning && 
+        <CloanContainer cloneToggle={this.cloneToggle} isCloning = {this.state.isCloaning}/>
+        }
        {localStorage.getItem('token') && !this.state.shouldLogin ? <SuiteDropzone loadProject={this.doLoadProject.bind(this)}>
           <SplitPane
             split="horizontal"
