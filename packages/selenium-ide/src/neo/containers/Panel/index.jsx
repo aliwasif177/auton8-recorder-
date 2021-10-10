@@ -340,8 +340,6 @@ res.data.payload.map(data=>{
             API.fetch(testCaseStepsData).then(res=>{
               res.data.payload.map(step=>{
                 let stepSplits = step.command.split('|')
-
-                testCase[nextIndex].createCommand(undefined, 'open', '/checkboxes')
             testCase[nextIndex].createCommand(undefined, stepSplits[0],stepSplits[1], stepSplits[2])
             // console.log(newProject.toJS())
             loadJSProject(this.state.project, newProject.toJS())
