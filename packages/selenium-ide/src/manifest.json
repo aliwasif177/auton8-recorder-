@@ -1,23 +1,23 @@
 {
-  "description": "Selenium Record and Playback tool for ease of getting acquainted with Selenium WebDriver.",
+  "description": "Auton8 Record and Playback tool for ease of getting acquainted with Auton8.",
   "manifest_version": 2,
-  "name": "Selenium IDE",
-  "version": "3.17.0",
-  "version_name": "3.17.0",
+  "name": "Auton8 Recorder",
+  "version": "1.0.0",
+  "version_name": "1.0.0",
   "homepage_url": "https://github.com/SeleniumHQ/selenium-ide",
   "icons": {
-    "16": "icons/icon16.png",
-    "32": "icons/icon32.png",
-    "64": "icons/icon64.png",
-    "128": "icons/icon128.png"
+    "16": "icons/auton8_16.png",
+    "32": "icons/auton8_32.png",
+    "64": "icons/auton8_64.png",
+    "128": "icons/auton8_128.png"
   },
   "browser_action": {
     "default_icon": {
-      "16": "icons/icon_menu16.png",
-      "32": "icons/icon_menu32.png",
-      "64": "icons/icon_menu64.png"
+      "16": "icons/auton8_16.png",
+      "32": "icons/auton8_32.png",
+      "64": "icons/auton8_64.png"
     },
-    "default_title": "Selenium IDE"
+    "default_title": "Auton8 Recorder"
   },
   "permissions": [
     "tabs",
