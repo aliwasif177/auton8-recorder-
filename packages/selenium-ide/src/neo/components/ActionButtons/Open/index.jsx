@@ -69,7 +69,7 @@ export class OpenInput extends React.Component {
           ref={input => {
             this.input = input
           }}
-          type="file"
+          // type="file"
           onChange={this.handleChange}
           onFocus={() => {
             if (this.label) {

@@ -28,6 +28,7 @@ import MoreButton from '../ActionButtons/More'
 import ListMenu, { ListMenuItem } from '../ListMenu'
 import UiState from '../../stores/view/UiState'
 import './style.css'
+import logo from '../../../icons/auton8_128.png'
 
 @observer
 export default class ProjectHeader extends React.Component {
@@ -76,15 +77,19 @@ export default class ProjectHeader extends React.Component {
         </div>
         <span className="buttons">
           <NewButton onClick={this.props.new} />
-          <OpenButton
-            onFileSelected={this.props.load}
-            openFile={this.props.openFile}
+          <SaveButton
+            data-place="left"
+            unsaved={this.props.changed}
+            onClick={this.props.load}
           />
           <SaveButton
             data-place="left"
             unsaved={this.props.changed}
             onClick={this.props.save}
           />
+          {/* <div className='d-inline'>
+            <img className='img-fluid' src={logo}/>
+          </div> */}
           <ListMenu
             width={250}
             padding={-5}

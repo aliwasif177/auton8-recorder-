@@ -30,6 +30,8 @@ export default class TestCase {
   @observable
   smsAlertListId = null
   @observable
+  webUrl = null
+  @observable
   commands = []
   nameDialogShown = false
   @observable
@@ -46,6 +48,7 @@ export default class TestCase {
     this.testCaseId = argv[0]
     this.emailAddressListId = argv[1]
     this.smsAlertListId = argv[2]
+    this.webUrl = argv[3]
 
     this.changeDisposer = reaction(
       () =>
@@ -183,6 +186,7 @@ export default class TestCase {
     test.emailAddressListId = jsRep.emailAddressListId
     test.testCaseId = jsRep.testCaseId
     test.smsAlertListId = jsRep.smsAlertListId
+    test.webUrl = jsRep.webUrl
     test.commands.replace(jsRep.commands.map(Command.fromJS))
 
     return test

@@ -25,25 +25,6 @@ export const CloanContainer = props => {
     getAllGroups()
   }, [])
 
-  useEffect(
-    () => {
-      if (cloneSuccess) {
-        toast.success('test case successfully cloned')
-        props.cloneToggle()
-      }
-    },
-    [cloneSuccess]
-  )
-
-  useEffect(
-    () => {
-      if (cloneError) {
-        toast.error('Failed to clone!')
-      }
-    },
-    [cloneError]
-  )
-
   const getAllGroups = async () => {
     setLoading(true)
     let data = {
@@ -65,7 +46,7 @@ export const CloanContainer = props => {
     groupInitialData.csrf = authHeader()
     API.post(groupInitialData)
       .then(res => {
-        setLoading(false)
+        // setLoading(false)
         setGroups(res.data.payload)
       })
       .catch(err => {
@@ -89,12 +70,13 @@ export const CloanContainer = props => {
       .then(res => {
         setLoading(false)
         setCloneSucces(res.payload)
-        setCloneError(null)
+        toast.success('test case cloned!')
+        props.cloneToggle()
       })
       .catch(err => {
         setLoading(false)
         setCloneSucces(null)
-        setCloneError(err)
+        toast.success(res.response.data.errors)
       })
   }
 
@@ -139,7 +121,9 @@ export const CloanContainer = props => {
           modalDescription={'Clone a test case'}
         >
           {loading ? (
-            <TailLoader width={100} height={100} />
+            <div style={{ textAlign: 'center' }}>
+              <TailLoader width={100} height={100} />
+            </div>
           ) : (
             <>
               <FormControl style={{ display: 'block' }} variant="filled">

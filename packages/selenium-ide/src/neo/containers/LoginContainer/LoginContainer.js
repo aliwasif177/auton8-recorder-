@@ -71,7 +71,7 @@ export const LoginContainer = props => {
         modalDescription={'Login modal'}
       >
         {loading ? (
-          <div className="text-center m-auto">
+          <div style={{ textAlign: 'center' }} className="text-center m-auto">
             <TailLoader height={100} width={100} />
           </div>
         ) : (

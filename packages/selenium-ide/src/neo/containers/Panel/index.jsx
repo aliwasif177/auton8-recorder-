@@ -53,6 +53,8 @@ import axios from 'axios'
 import ExportDialog from '../../components/Dialogs/Export/index'
 import { LoginContainer } from '../LoginContainer/LoginContainer'
 import { CloanContainer } from '../cloneConainer/CloanContainer'
+import { toast } from 'react-toastify'
+import { TailLoader } from '../loader/loader'
 
 if (!isTest) {
   const api = require('../../../api')
@@ -69,10 +71,10 @@ const project = observable(new ProjectStore(''))
 UiState.setProject(project)
 
 if (isProduction) {
-  createDefaultSuite(project, { suite: '', test: '' })
+  // createDefaultSuite(project, { suite: '', test: '' })
 
 } else {
-  seed(project)
+  // seed(project)
 }
 project.setModified(false)
 
@@ -114,7 +116,7 @@ if (browser.windows) {
 export default class Panel extends React.Component {
   constructor(props) {
     super(props)
-    this.state = { project, saveButton: false, modalOpen: false,shouldLogin:false, isCloaning:false,isUpdating:false }
+    this.state = { project, saveButton: false, modalOpen: false,shouldLogin:false, isCloaning:false,isUpdating:false,loading:false }
     this.parseKeyDown = this.parseKeyDown.bind(this)
     this.keyDownHandler = window.document.body.onkeydown = this.handleKeyDown.bind(
       this
@@ -248,6 +250,7 @@ export default class Panel extends React.Component {
 
 
 componentDidMount(){
+  
     localStorage.getItem('token') ? this.getAllGroups() : this.setState({shouldLogin:true})
 }
 
@@ -293,6 +296,9 @@ componentDidMount(){
 
 
   getAllGroups = async() => {
+    this.setState({
+      loading:true
+    })
     let data= {
       "pageNo": 0,
       "pageSize": 200,
@@ -328,24 +334,42 @@ componentDidMount(){
           
           API.fetch(groupTestcaseInitialData).then(res=>{
 
-res.data.payload.map(data=>{
+res.data.payload.map((data,testCaseIndex)=>{
 
-  testCase[nextIndex]=newProject.createTestCase(data.testName,data.testCaseId,data.emailAddressListId,data.smsAlertListId)
+  testCase[nextIndex]=newProject.createTestCase(data.testName,data.testCaseId,data.emailAddressListId,data.smsAlertListId,'www.google.com')
   
   
             suites[nextIndex].addTestCase(testCase[nextIndex]) 
             let testCaseStepsData = {}
             testCaseStepsData.path = `/testcases/${data.testCaseId}/testcasesteps`;
             testCaseStepsData.csrf = authHeader();
+let testCaseRes= res.data.paload
             API.fetch(testCaseStepsData).then(res=>{
-              res.data.payload.map(step=>{
+              let testcaseIndexForStep = testCaseIndex
+              res.data.payload.map((step,stepIndex)=>{
                 let stepSplits = step.command.split('|')
             testCase[nextIndex].createCommand(undefined, stepSplits[0],stepSplits[1], stepSplits[2])
             // console.log(newProject.toJS())
             loadJSProject(this.state.project, newProject.toJS())
+            if(testcaseIndexForStep+1 ==  testCaseRes.length && stepIndex+1 == res.data.payload.length ){
+              this.setState({
+                loading:false
               })
 
+            }
+              })
+
+              
+
             }).catch(err=>{
+              this.setState({
+                loading:false
+              })
+              // if(err){
+
+              //   toast.error(err.response.data.errors.message)
+              // }
+
 
             })
 
@@ -361,6 +385,13 @@ res.data.payload.map(data=>{
 
           }).catch(err=>{
             console.log(err)
+            // if(err){
+
+            //   toast.error(err.response.data.errors.message)
+            // }
+            this.setState({
+              loading:false
+            })
 
           });
           
@@ -374,6 +405,13 @@ res.data.payload.map(data=>{
       // })
     }).catch(err=>{
       console.log(err)
+      // if(err){
+
+      //   toast.error(err.response.data.errors.message)
+      // }
+      this.setState({
+        loading:false
+      })
     });
   }
 
@@ -468,6 +506,13 @@ res.data.payload.map(data=>{
           
     
       }).catch((err)=>{
+        this.setState({
+          loading:false
+        })
+        // if(err) {
+        //   toast.error(err.response.data.errors.message)
+
+        // }
         
       });
   
@@ -481,7 +526,7 @@ res.data.payload.map(data=>{
       
     }
 
-    updateTestCase = () => {
+    cloneTestCase = () => {
       console.log(UiState.displayedTest)
       this.setState({
         isCloaning:true
@@ -494,6 +539,36 @@ res.data.payload.map(data=>{
       this.setState({
         isCloaning:!this.state.isCloaning
       })
+    }
+
+    updateTestCase = () => {
+      console.log(UiState.displayedTest)
+      let data= {
+        "pageNo": 0,
+        "pageSize": 200,
+        "sortBy": "",
+        "sortDirection": "",
+        "searchParams": {
+            "projectName": "undefinedsms:undefined",
+            "testCaseName": "",
+            "emailList": "",
+            "smsListName": ""
+        }
+    }
+     
+    
+      let updateTestCaseData = {};
+      updateTestCaseData.data={data}
+      updateTestCaseData.path = `/testcases/${UiState.displayedTest.testCaseId}`;
+      updateTestCaseData.csrf = authHeader();
+      API.put(updateTestCaseData).then(res=>{
+toast.success('Test case updated successfully')
+      }).catch(err=>{
+        toast.success('Failed to update test case')
+
+      })
+
+
     }
 
 
@@ -539,12 +614,12 @@ res.data.payload.map(data=>{
                 //   this.openFile = openFile
                 // }}
                 // load={this.doLoadProject.bind(this)}
-                // load={this.updateTestCase}
+                load={this.updateTestCase.bind(this)}
                 save={() => 
                   this.save()
                   // saveProject(this.state.project)
                 }
-                new={this.updateTestCase}
+                new={this.cloneTestCase.bind(this)}
               />
               <div
                 className={classNames('content', {
@@ -559,11 +634,23 @@ res.data.payload.map(data=>{
                   size={UiState.navigationWidth}
                   onChange={UiState.resizeNavigation}
                 >
-                  <Navigation
-                    tests={UiState.filteredTests}
+                   {this.state.loading &&
+                  <div style={{textAlign:'center'}} className='mt-5 pt-5'>
+
+                    <TailLoader  height={100} width={100}/>
+                  </div>
+                  
+                  
+                }
+
+                <Navigation
+                
+                    tests={ UiState.filteredTests}
                     suites={this.state.project.suites}
                     duplicateTest={this.state.project.duplicateTestCase}
                   />
+                
+                  
                   <Editor
                     url={this.state.project.url}
                     urls={this.state.project.urls}
@@ -571,6 +658,7 @@ res.data.payload.map(data=>{
                     test={UiState.displayedTest}
                     callstackIndex={UiState.selectedTest.stack}
                   />
+                  
                 </SplitPane>
               </div>
             </div>

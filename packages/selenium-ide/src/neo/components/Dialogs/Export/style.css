@@ -25,17 +25,17 @@
   vertical-align: middle;
 }
 
-.MuiFormControl-root {
+/* .MuiFormControl-root {
   display: block !important;
-}
+} */
 .MuiInputLabel-filled.MuiInputLabel-shrink {
-  transform: translate(31px, 6px) scale(0.75) !important;
+  /* transform: translate(31px, 6px) scale(0.75) !important; */
 }
 .MuiInputLabel-filled {
-  z-index: 1;
+  /* z-index: 1;
   transform: translate(36px, 20px) scale(1) !important;
-  pointer-events: none;
+  pointer-events: none; */
 }
-.MuiInputBase-root {
+/* .MuiInputBase-root {
   display: block !important;
-}
+} */
