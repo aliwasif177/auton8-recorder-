@@ -72,7 +72,6 @@ UiState.setProject(project)
 
 if (isProduction) {
   // createDefaultSuite(project, { suite: '', test: '' })
-
 } else {
   // seed(project)
 }
@@ -116,7 +115,15 @@ if (browser.windows) {
 export default class Panel extends React.Component {
   constructor(props) {
     super(props)
-    this.state = { project, saveButton: false, modalOpen: false,shouldLogin:false, isCloaning:false,isUpdating:false,loading:false }
+    this.state = {
+      project,
+      saveButton: false,
+      modalOpen: false,
+      shouldLogin: false,
+      isCloaning: false,
+      isUpdating: false,
+      loading: false,
+    }
     this.parseKeyDown = this.parseKeyDown.bind(this)
     this.keyDownHandler = window.document.body.onkeydown = this.handleKeyDown.bind(
       this
@@ -248,13 +255,11 @@ export default class Panel extends React.Component {
     }
   }
 
-
-componentDidMount(){
-  
-    localStorage.getItem('token') ? this.getAllGroups() : this.setState({shouldLogin:true})
-}
-
-
+  componentDidMount() {
+    localStorage.getItem('token')
+      ? this.getAllGroups()
+      : this.setState({ shouldLogin: true })
+  }
 
   async loadNewProject() {
     if (!UiState.isSaved()) {
@@ -294,135 +299,111 @@ componentDidMount(){
     newProject.setModified(false)
   }
 
-
-  getAllGroups = async() => {
+  getAllGroups = async () => {
     this.setState({
-      loading:true
+      loading: true,
     })
-    let data= {
-      "pageNo": 0,
-      "pageSize": 200,
-      "sortBy": "",
-      "sortDirection": "",
-      "searchParams": {
-          "projectName": "undefinedsms:undefined",
-          "testCaseName": "",
-          "emailList": "",
-          "smsListName": ""
-      }
-  }
-   
-  
-    let groupInitialData = {};
-    groupInitialData.data={data}
-    groupInitialData.path = "/groups/paginated";
-    groupInitialData.csrf = authHeader();
-    API.post(groupInitialData).then(res=>{
-      let newProject=null
-      let suites = []
-      let testCase = []
-      newProject =observable(new ProjectStore('Auton8'))
-      res.data.payload.map((data,index)=>{
-        suites[index] = newProject.createSuite(data.siteGroupName)
-        suites[index].groupTestId=data.siteGroupId;
-          let groupTestcaseInitialData = {};
-          groupTestcaseInitialData.path = `/groups/${data.siteGroupId}/testcases`;
-          groupTestcaseInitialData.csrf = authHeader();
-          let nextIndex=index
+    let data = {
+      pageNo: 0,
+      pageSize: 200,
+      sortBy: '',
+      sortDirection: '',
+      searchParams: {
+        projectName: 'undefinedsms:undefined',
+        testCaseName: '',
+        emailList: '',
+        smsListName: '',
+      },
+    }
 
-          let nextData = data
-          
-          API.fetch(groupTestcaseInitialData).then(res=>{
+    let groupInitialData = {}
+    groupInitialData.data = { data }
+    groupInitialData.path = '/groups/paginated'
+    groupInitialData.csrf = authHeader()
+    API.post(groupInitialData)
+      .then(res => {
+        let newProject = null
+        let suites = []
+        let testCase = []
+        newProject = observable(new ProjectStore('Auton8'))
+        res.data.payload.map((data, index) => {
+          suites[index] = newProject.createSuite(
+            data.siteGroupName,
+            data.siteGroupId
+          )
+          loadJSProject(this.state.project, newProject.toJS())
+          this.setState({
+            loading: false,
+          })
 
-res.data.payload.map((data,testCaseIndex)=>{
+          // API.fetch(groupTestcaseInitialData)
+          //   .then(res => {
+          //     res.data.payload.map((data, testCaseIndex) => {
+          //       testCase[nextIndex] = newProject.createTestCase(
+          //         data.testName,
+          //         data.testCaseId,
+          //         data.emailAddressListId,
+          //         data.smsAlertListId,
+          //         'www.google.com'
+          //       )
 
-  testCase[nextIndex]=newProject.createTestCase(data.testName,data.testCaseId,data.emailAddressListId,data.smsAlertListId,'www.google.com')
-  
-  
-            suites[nextIndex].addTestCase(testCase[nextIndex]) 
-            let testCaseStepsData = {}
-            testCaseStepsData.path = `/testcases/${data.testCaseId}/testcasesteps`;
-            testCaseStepsData.csrf = authHeader();
-let testCaseRes= res.data.paload
-            API.fetch(testCaseStepsData).then(res=>{
-              let testcaseIndexForStep = testCaseIndex
-              res.data.payload.map((step,stepIndex)=>{
-                let stepSplits = step.command.split('|')
-            testCase[nextIndex].createCommand(undefined, stepSplits[0],stepSplits[1], stepSplits[2])
-            // console.log(newProject.toJS())
-            loadJSProject(this.state.project, newProject.toJS())
-            if(testcaseIndexForStep+1 ==  testCaseRes.length && stepIndex+1 == res.data.payload.length ){
-              this.setState({
-                loading:false
-              })
-
-            }
-              })
-
-              
-
-            }).catch(err=>{
-              this.setState({
-                loading:false
-              })
-              // if(err){
-
-              //   toast.error(err.response.data.errors.message)
-              // }
-
-
-            })
-
-})
-          
-          
-
-
-
-
-
-// debugger
-
-          }).catch(err=>{
-            console.log(err)
-            // if(err){
-
-            //   toast.error(err.response.data.errors.message)
-            // }
-            this.setState({
-              loading:false
-            })
-
-          });
-          
-        
+          //       suites[nextIndex].addTestCase(testCase[nextIndex])
+          //       let testCaseStepsData = {}
+          //       testCaseStepsData.path = `/testcases/${
+          //         data.testCaseId
+          //       }/testcasesteps`
+          //       testCaseStepsData.csrf = authHeader()
+          //       let testCaseRes = res.data.paload
+          //       API.fetch(testCaseStepsData)
+          //         .then(res => {
+          //           let testcaseIndexForStep = testCaseIndex
+          //           res.data.payload.map((step, stepIndex) => {
+          //             let stepSplits = step.command.split('|')
+          //             testCase[nextIndex].createCommand(
+          //               undefined,
+          //               stepSplits[0],
+          //               stepSplits[1],
+          //               stepSplits[2]
+          //             )
+          //             loadJSProject(this.state.project, newProject.toJS())
+          //             if (
+          //               testcaseIndexForStep + 1 == testCaseRes.length &&
+          //               stepIndex + 1 == res.data.payload.length
+          //             ) {
+          //               this.setState({
+          //                 loading: false,
+          //               })
+          //             }
+          //           })
+          //         })
+          //         .catch(err => {
+          //           this.setState({
+          //             loading: false,
+          //           })
+          //         })
+          //     })
+          //   })
+          // .catch(err => {
+          //   console.log(err)
+          //   this.setState({
+          //     loading: false,
+          //   })
+          // })
+        })
       })
-      // loadJSProject(this.state.project, newProject.toJS())
-      // let tempProjects ={...this.state.project}
-      // tempProjects.suites=tempProjects.suites.push(res.data.payload)
-      // this.setState({
-      //   project:tempProjects
-      // })
-    }).catch(err=>{
-      console.log(err)
-      // if(err){
-
-      //   toast.error(err.response.data.errors.message)
-      // }
-      this.setState({
-        loading:false
+      .catch(err => {
+        console.log(err)
+        this.setState({
+          loading: false,
+        })
       })
-    });
   }
 
-
-  handleLoginModal = (bool) => {
+  handleLoginModal = bool => {
     this.setState({
-      shouldLogin:bool
-      
+      shouldLogin: bool,
     })
   }
-
 
   async doLoadProject(file) {
     if (!UiState.isSaved()) {
@@ -462,24 +443,24 @@ let testCaseRes= res.data.paload
     }
   }
   save = () => {
-    console.log("FUKCY OUUUUU", UiState.selectedTest)
-    this.setState({saveButton: !this.state.saveButton, modalOpen: !this.state.modalOpen})
+    this.setState({
+      saveButton: !this.state.saveButton,
+      modalOpen: !this.state.modalOpen,
+    })
   }
 
+  addTeststepstoTestCase = async id => {
+    console.log('my id ', id)
 
-
-
-  addTeststepstoTestCase = async(id) => {
-    console.log('my id ' , id)
-  
-    UiState.displayedTest.commands.map(command=>{
+    UiState.displayedTest.commands.map(command => {
       console.log(command)
-      let params = new FormData();
-      let commandTargetValue=command.command+'|'+command.target+'|'+command.value
-  
-      params.append("file", null);
+      let params = new FormData()
+      let commandTargetValue =
+        command.command + '|' + command.target + '|' + command.value
+
+      params.append('file', null)
       params.append(
-        "testCaseStep",
+        'testCaseStep',
         new Blob(
           [
             JSON.stringify({
@@ -488,89 +469,72 @@ let testCaseRes= res.data.paload
             }),
           ],
           {
-            type: "application/json",
+            type: 'application/json',
           }
         )
-      );
-  
-      let testStepData = {};
-      testStepData.data=params
-      testStepData.path = '/testcasesteps';
-      testStepData.csrf = authHeader();
-      const response =  API.post(testStepData).then((res)=>{
-        console.log(res)
-  
-  
-          
-          
-          
-    
-      }).catch((err)=>{
-        this.setState({
-          loading:false
+      )
+
+      let testStepData = {}
+      testStepData.data = params
+      testStepData.path = '/testcasesteps'
+      testStepData.csrf = authHeader()
+      const response = API.post(testStepData)
+        .then(res => {
+          console.log(res)
         })
-        // if(err) {
-        //   toast.error(err.response.data.errors.message)
+        .catch(err => {
+          this.setState({
+            loading: false,
+          })
+          // if(err) {
+          //   toast.error(err.response.data.errors.message)
 
-        // }
-        
-      });
-  
-  
-  
-  
-      
-  
-  
+          // }
+        })
     })
-      
+  }
+
+  cloneTestCase = () => {
+    console.log(UiState.displayedTest)
+    this.setState({
+      isCloaning: true,
+    })
+    console.log(this.state.project)
+  }
+
+  cloneToggle = () => {
+    this.setState({
+      isCloaning: !this.state.isCloaning,
+    })
+  }
+
+  updateTestCase = () => {
+    console.log(UiState.displayedTest)
+    let data = {
+      pageNo: 0,
+      pageSize: 200,
+      sortBy: '',
+      sortDirection: '',
+      searchParams: {
+        projectName: 'undefinedsms:undefined',
+        testCaseName: '',
+        emailList: '',
+        smsListName: '',
+      },
     }
 
-    cloneTestCase = () => {
-      console.log(UiState.displayedTest)
-      this.setState({
-        isCloaning:true
+    let updateTestCaseData = {}
+    updateTestCaseData.data = { data }
+    updateTestCaseData.path = `/testcases/${UiState.displayedTest.testCaseId}`
+    updateTestCaseData.csrf = authHeader()
+    API.put(updateTestCaseData)
+      .then(res => {
+        toast.success('Test case updated successfully')
       })
-      console.log(this.state.project)
-    }
-
-
-    cloneToggle = () =>{
-      this.setState({
-        isCloaning:!this.state.isCloaning
-      })
-    }
-
-    updateTestCase = () => {
-      console.log(UiState.displayedTest)
-      let data= {
-        "pageNo": 0,
-        "pageSize": 200,
-        "sortBy": "",
-        "sortDirection": "",
-        "searchParams": {
-            "projectName": "undefinedsms:undefined",
-            "testCaseName": "",
-            "emailList": "",
-            "smsListName": ""
-        }
-    }
-     
-    
-      let updateTestCaseData = {};
-      updateTestCaseData.data={data}
-      updateTestCaseData.path = `/testcases/${UiState.displayedTest.testCaseId}`;
-      updateTestCaseData.csrf = authHeader();
-      API.put(updateTestCaseData).then(res=>{
-toast.success('Test case updated successfully')
-      }).catch(err=>{
+      .catch(err => {
         toast.success('Failed to update test case')
-
       })
-
-
-    }
-
+  }
 
   render() {
     return (
@@ -581,98 +545,112 @@ toast.success('Test case updated successfully')
         )}
         onKeyDown={this.handleKeyDownAlt.bind(this)}
         style={{
-          minHeight: UiState.minContentHeight + UiState.minConsoleHeight + 'px',height:'100vh'
+          minHeight: UiState.minContentHeight + UiState.minConsoleHeight + 'px',
+          height: '100vh',
         }}
       >
-        {localStorage.getItem('token') && this.state.isCloaning && 
-        <CloanContainer cloneToggle={this.cloneToggle} isCloning = {this.state.isCloaning}/>
-        }
-       {localStorage.getItem('token') && !this.state.shouldLogin ? <SuiteDropzone loadProject={this.doLoadProject.bind(this)}>
-          <SplitPane
-            split="horizontal"
-            minSize={UiState.windowHeight}
-            maxSize={UiState.windowHeight}
-            size={UiState.windowHeight}
-            onChange={size => UiState.resizeConsole(window.innerHeight - size)}
-            style={{
-              position: 'initial',
-              height:'100%'
-            }}
-          >
-            <div className="wrapper">
-            {/* //Modal Start */}
-
-
-
-            {/* //Modal End */}
-              <PauseBanner />
-              <ProjectHeader
-                title={this.state.project.name}
-                changed={this.state.project.modified}
-                changeName={this.state.project.changeName}
-                // openFile={openFile => {
-                //   this.openFile = openFile
-                // }}
-                // load={this.doLoadProject.bind(this)}
-                load={this.updateTestCase.bind(this)}
-                save={() => 
-                  this.save()
-                  // saveProject(this.state.project)
-                }
-                new={this.cloneTestCase.bind(this)}
-              />
-              <div
-                className={classNames('content', {
-                  dragging: UiState.navigationDragging,
-                })}
-              >
-              { this.state.saveButton && <ExportDialog isExporting={this.state.modalOpen} cancelSelection={this.save} />}
-                <SplitPane
-                  split="vertical"
-                  minSize={UiState.minNavigationWidth}
-                  maxSize={UiState.maxNavigationWidth}
-                  size={UiState.navigationWidth}
-                  onChange={UiState.resizeNavigation}
-                >
-                   {this.state.loading &&
-                  <div style={{textAlign:'center'}} className='mt-5 pt-5'>
-
-                    <TailLoader  height={100} width={100}/>
-                  </div>
-                  
-                  
-                }
-
-                <Navigation
-                
-                    tests={ UiState.filteredTests}
-                    suites={this.state.project.suites}
-                    duplicateTest={this.state.project.duplicateTestCase}
-                  />
-                
-                  
-                  <Editor
-                    url={this.state.project.url}
-                    urls={this.state.project.urls}
-                    setUrl={this.state.project.setUrl}
-                    test={UiState.displayedTest}
-                    callstackIndex={UiState.selectedTest.stack}
-                  />
-                  
-                </SplitPane>
-              </div>
-            </div>
-            <Console
-              height={UiState.consoleHeight}
-              restoreSize={UiState.restoreConsoleSize}
+        {localStorage.getItem('token') &&
+          this.state.isCloaning && (
+            <CloanContainer
+              cloneToggle={this.cloneToggle}
+              isCloning={this.state.isCloaning}
             />
-          </SplitPane>
-          <Modal
-            project={this.state.project}
-            createNewProject={this.createNewProject.bind(this)}
+          )}
+        {localStorage.getItem('token') && !this.state.shouldLogin ? (
+          <SuiteDropzone loadProject={this.doLoadProject.bind(this)}>
+            <SplitPane
+              split="horizontal"
+              minSize={UiState.windowHeight}
+              maxSize={UiState.windowHeight}
+              size={UiState.windowHeight}
+              onChange={size =>
+                UiState.resizeConsole(window.innerHeight - size)
+              }
+              style={{
+                position: 'initial',
+                height: '100%',
+              }}
+            >
+              <div className="wrapper">
+                {/* //Modal Start */}
+
+                {/* //Modal End */}
+                <PauseBanner />
+                <ProjectHeader
+                  title={this.state.project.name}
+                  changed={this.state.project.modified}
+                  changeName={this.state.project.changeName}
+                  // openFile={openFile => {
+                  //   this.openFile = openFile
+                  // }}
+                  // load={this.doLoadProject.bind(this)}
+                  load={this.updateTestCase.bind(this)}
+                  save={
+                    () => this.save()
+                    // saveProject(this.state.project)
+                  }
+                  new={this.cloneTestCase.bind(this)}
+                />
+                <div
+                  className={classNames('content', {
+                    dragging: UiState.navigationDragging,
+                  })}
+                >
+                  {this.state.saveButton && (
+                    <ExportDialog
+                      isExporting={this.state.modalOpen}
+                      cancelSelection={this.save}
+                    />
+                  )}
+                  <SplitPane
+                    split="vertical"
+                    minSize={UiState.minNavigationWidth}
+                    maxSize={UiState.maxNavigationWidth}
+                    size={UiState.navigationWidth}
+                    onChange={UiState.resizeNavigation}
+                  >
+                    {this.state.loading && (
+                      <div
+                        style={{ textAlign: 'center' }}
+                        className="mt-5 pt-5"
+                      >
+                        <TailLoader height={100} width={100} />
+                      </div>
+                    )}
+
+                    <Navigation
+                      tests={UiState.filteredTests}
+                      suites={this.state.project.suites}
+                      duplicateTest={this.state.project.duplicateTestCase}
+                    />
+
+                    <Editor
+                      url={this.state.project.url}
+                      urls={this.state.project.urls}
+                      setUrl={this.state.project.setUrl}
+                      test={UiState.displayedTest}
+                      callstackIndex={UiState.selectedTest.stack}
+                    />
+                  </SplitPane>
+                </div>
+              </div>
+              <Console
+                height={UiState.consoleHeight}
+                restoreSize={UiState.restoreConsoleSize}
+              />
+            </SplitPane>
+            <Modal
+              project={this.state.project}
+              createNewProject={this.createNewProject.bind(this)}
+            />
+            <Tooltip />
+          </SuiteDropzone>
+        ) : (
+          <LoginContainer
+            getAllGroups={this.getAllGroups}
+            handleLoginModal={this.handleLoginModal}
           />
-          <Tooltip />
-        </SuiteDropzone> :<LoginContainer getAllGroups={this.getAllGroups} handleLoginModal={this.handleLoginModal} />}
+        )}
       </div>
     )
   }

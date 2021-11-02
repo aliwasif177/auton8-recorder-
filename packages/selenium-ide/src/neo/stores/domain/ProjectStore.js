@@ -122,6 +122,7 @@ export default class ProjectStore {
 
   @action.bound
   createSuite(...argv) {
+    debugger
     const suite = new Suite(undefined, ...argv)
     this._suites.push(suite)
 

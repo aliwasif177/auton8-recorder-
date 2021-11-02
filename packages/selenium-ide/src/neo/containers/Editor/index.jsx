@@ -24,6 +24,7 @@ import ToolBar from '../../components/ToolBar'
 import UrlBar from '../../components/UrlBar'
 import TestTable from '../../components/TestTable'
 import CommandForm from '../../components/CommandForm'
+
 import './style.css'
 
 @observer
@@ -88,8 +89,31 @@ export default class Editor extends React.Component {
           urls={this.props.urls}
           setUrl={this.props.setUrl}
         />
-        <TestTable
-          commands={this.props.test ? this.props.test.commands : null}
+
+        {UiState.displayedTest && (
+          <TestTable
+            commands={
+              UiState.displayedTest ? UiState.displayedTest.commands : null
+            }
+            callstackIndex={UiState.selectedTest.stack}
+            selectedCommand={
+              UiState.selectedCommand ? UiState.selectedCommand.id : null
+            }
+            selectCommand={UiState.selectCommand}
+            addCommand={this.addCommand}
+            removeCommand={this.removeCommand}
+            clearAllCommands={
+              UiState.displayedTest
+                ? UiState.displayedTest.clearAllCommands
+                : null
+            }
+            swapCommands={
+              UiState.displayedTest ? UiState.displayedTest.swapCommands : null
+            }
+          />
+        )}
+        {/* <TestTable
+          commands={UI ? this.props.test.commands : null}
           callstackIndex={this.props.callstackIndex}
           selectedCommand={
             UiState.selectedCommand ? UiState.selectedCommand.id : null
@@ -101,7 +125,7 @@ export default class Editor extends React.Component {
             this.props.test ? this.props.test.clearAllCommands : null
           }
           swapCommands={this.props.test ? this.props.test.swapCommands : null}
-        />
+        /> */}
         <CommandForm
           command={UiState.selectedCommand}
           setCommand={this.handleCommandChange}

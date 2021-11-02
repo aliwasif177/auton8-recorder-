@@ -38,10 +38,13 @@ export default class Suite {
   modified = false
   @observable
   isOpen = false
+  @observable
+  groupTestId = null
 
-  constructor(id = uuidv4(), name = 'Untitled Suite') {
+  constructor(id = uuidv4(), name = 'Untitled Suite', ...argv) {
     this.id = id
     this.name = name
+    this.groupTestId = argv[0]
     this.changeTestsDisposer = reaction(
       () => this._tests.length,
       () => {
@@ -66,6 +69,12 @@ export default class Suite {
   @action.bound
   setName(name) {
     this.name = name
+    this.modified = true
+  }
+
+  @action.bound
+  setGroupTestId(groupTestId) {
+    this.groupTestId = groupTestId
     this.modified = true
   }
 
@@ -166,6 +175,7 @@ export default class Suite {
     return {
       id: this.id,
       name: this.name,
+      groupTestId: this.groupTestId,
       persistSession: this.persistSession,
       parallel: this.isParallel,
       timeout: this.timeout,
@@ -177,12 +187,14 @@ export default class Suite {
   static fromJS = function(jsRep, projectTests) {
     const suite = new Suite(jsRep.id)
     suite.setName(jsRep.name)
+    suite.setGroupTestId(jsRep.groupTestId)
     suite.setTimeout(jsRep.timeout)
     suite.setParallel(jsRep.parallel)
     suite.setPersistSession(jsRep.persistSession)
     suite._tests.replace(
       jsRep.tests.map(testId => projectTests.find(({ id }) => id === testId))
     )
+    debugger
 
     return suite
   }

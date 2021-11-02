@@ -29,6 +29,8 @@ import { withOnContextMenu } from '../ContextMenu'
 import ListMenu, { ListMenuItem } from '../ListMenu'
 import MoreButton from '../ActionButtons/More'
 import './style.css'
+import { authHeader } from '../Dialogs/service/authHeader'
+import API from '../../../../src/neo/components/Dialogs/service/httpService'
 
 const testTarget = {
   canDrop(props, monitor) {
@@ -76,8 +78,47 @@ class Suite extends React.Component {
     setContextMenu: PropTypes.func,
     codeExport: PropTypes.func,
   }
-  handleClick() {
+
+  getAllTestCase = async id => {
+    let groupTestcaseInitialData = {}
+    groupTestcaseInitialData.path = `/groups/${id}/testcases`
+    groupTestcaseInitialData.csrf = authHeader()
+    API.fetch(groupTestcaseInitialData)
+      .then(res => {
+        let testcases = []
+        res.data.payload.map((testCase, index) => {
+          testcases[index] = UiState._project.createTestCase(
+            testCase.testName,
+            testCase.testCaseId,
+            testCase.emailAddressListId,
+            testCase.smsAlertListId,
+            'www.google.com'
+          )
+          this.props.suite.addTestCase(testcases[index])
+        })
+      })
+      .catch(err => {
+        console.log(err)
+        // if(err){
+
+        //   toast.error(err.response.data.errors.message)
+        // }
+        // this.setState({
+        //   loading: false,
+        // })
+      })
+  }
+
+  handleClick = suit => {
+    console.log(this.props.suite)
+
+    console.log(UiState)
+    console.log(suit)
+
     this.props.suite.setOpen(!this.props.suite.isOpen)
+    if (this.props.suite.isOpen) {
+      this.getAllTestCase(this.props.suite.groupTestId)
+    }
   }
   handleKeyDown(event) {
     const e = event.nativeEvent
@@ -127,7 +168,7 @@ class Suite extends React.Component {
                 PlaybackState.suiteState.get(this.props.suite.id),
                 { active: this.props.suite.isOpen }
               )}
-              onClick={this.handleClick}
+              onClick={suit => this.handleClick(suit)}
             >
               <span className="si-caret" />
               <span

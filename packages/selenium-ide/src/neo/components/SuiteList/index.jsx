@@ -33,13 +33,7 @@ export default class SuiteList extends React.Component {
     codeExport: PropTypes.func.isRequired,
   }
 
-
-
-
   render() {
-
-    console.log(this.props.suites)
-    debugger
     return (
       <ul className="projects">
         {this.props.suites.map(suite => (

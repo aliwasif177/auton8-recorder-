@@ -24,6 +24,7 @@ import Test, { DraggableTest, MenuTest } from '../Test'
 import UiState from '../../stores/view/UiState'
 import PlaybackState from '../../stores/view/PlaybackState'
 import './style.css'
+import { authHeader } from '../Dialogs/service/authHeader'
 
 @inject('renameTest')
 @observer
@@ -38,6 +39,7 @@ export default class TestList extends Component {
     codeExport: PropTypes.func,
     noMenu: PropTypes.bool,
   }
+
   render() {
     return (
       <div
@@ -79,6 +81,7 @@ export default class TestList extends Component {
                   }
                   changed={test.modified}
                   selectTest={UiState.selectTest}
+                  // selectTest={() => this.addTestSteps()}
                   moveSelectionUp={() => {
                     UiState.selectTestByIndex(index - 1)
                   }}

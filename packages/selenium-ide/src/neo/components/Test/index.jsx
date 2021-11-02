@@ -26,6 +26,9 @@ import { withOnContextMenu } from '../ContextMenu'
 import ListMenu, { ListMenuItem } from '../ListMenu'
 import MoreButton from '../ActionButtons/More'
 import './style.css'
+import UiState from '../../stores/view/UiState'
+import { authHeader } from '../Dialogs/service/authHeader'
+import API from '../../../../src/neo/components/Dialogs/service/httpService'
 
 export const Type = 'test'
 
@@ -170,6 +173,7 @@ export default class Test extends React.Component {
   }
   handleClick(test, suite) {
     this.props.selectTest(test, suite)
+    this.addTestSteps(test)
   }
   handleKeyDown(event) {
     const e = event.nativeEvent
@@ -215,7 +219,38 @@ export default class Test extends React.Component {
     }
   }
   handleCallstackClick(test, suite, index) {
-    this.props.selectTest(test, suite, index)
+    this.props.selectTest(UiState.displayedTest, suite, index)
+  }
+
+  addTestSteps = test => {
+    UiState.selectTest
+    let testCaseStepsData = {}
+    testCaseStepsData.path = `/testcases/${test.testCaseId}/testcasesteps`
+    testCaseStepsData.csrf = authHeader()
+    API.fetch(testCaseStepsData)
+      .then(res => {
+        res.data.payload.map((step, stepIndex) => {
+          let stepSplits = step.command.split('|')
+          test.createCommand(
+            undefined,
+            stepSplits[0],
+            stepSplits[1],
+            stepSplits[2]
+          )
+          if (stepIndex === res.data.payload.length - 1) {
+            UiState.selectTest
+
+            // this.setState({
+            //   loading: false,
+            // })
+          }
+        })
+      })
+      .catch(err => {
+        this.setState({
+          loading: false,
+        })
+      })
   }
   render() {
     const rendered = (
