@@ -300,9 +300,10 @@ export default class ExportDialog extends React.Component {
       })
   }
 
-  addTeststepstoTestCase = id => {
+  addTeststepstoTestCase = async id => {
     if (UiState.displayedTest.commands.length > 0) {
-      UiState.displayedTest.commands.map((command, index) => {
+      let tempSteps = []
+      await UiState.displayedTest.commands.map(command => {
         let params = new FormData()
         let commandTargetValue =
           command.command + '|' + command.target + '|' + command.value
@@ -322,25 +323,29 @@ export default class ExportDialog extends React.Component {
             }
           )
         )
-
-        this.testcasestepsCall(params, index)
+        tempSteps.push(params)
       })
+
+      if (tempSteps.length) {
+        this.testcasestepsCall(tempSteps)
+      }
     }
   }
 
-  testcasestepsCall = async (params, index) => {
+  testcasestepsCall = params => {
     let testStepData = {}
     testStepData.data = params
-    testStepData.path = '/testcasesteps'
+    testStepData.path = '/testcasestepsCollections'
     testStepData.csrf = authHeader()
-    await API.post(testStepData)
+    for (var pair of params[0].entries()) {
+      console.log(pair[0] + ', ' + pair[1])
+    }
+    API.post(testStepData)
       .then(res => {
-        if (index == UiState.displayedTest.commands.length - 1) {
-          toast.success('Testcase exported successfully')
-          this.setState({
-            exportSucccess: true,
-          })
-        }
+        toast.success('Testcase exported successfully')
+        this.setState({
+          exportSucccess: true,
+        })
       })
       .catch(err => {
         toast.error(err.response.data.errors.message)
